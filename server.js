@@ -1,4 +1,4 @@
-import express from 'express';
+/*import express from 'express';
 import cors from 'cors';
 import 'dotenv/config';
 
@@ -84,4 +84,4 @@ app.post('/api/classify', async (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
-});
+});*/
