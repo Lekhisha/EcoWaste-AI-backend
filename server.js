@@ -18,7 +18,9 @@ const app = express();
 
 // Allow your frontend origins
 app.use(cors({
-  origin: ["http://localhost:5173","https://eco-waste-ai-frontend.vercel.app/"], // add more if needed
+  origin: ["http://localhost:5173","https://eco-waste-ai-frontend.vercel.app"], // add more if needed
+  methods: ["GET","POST","OPTIONS"],
+  allowedHeaders: ["Content-Type"]
 }));
 
 // Accept JSON payloads up to 10MB
