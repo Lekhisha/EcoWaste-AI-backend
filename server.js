@@ -1,68 +1,49 @@
-import express from "express";
-import cors from "cors";
-import dotenv from "dotenv";
 import axios from "axios";
 
-dotenv.config();
+export default async function handler(req, res) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-const PORT = process.env.PORT || 8000;
-const ROBOFLOW_API_KEY = process.env.ROBOFLOW_API_KEY;
-const ROBOFLOW_MODEL_URL = "https://serverless.roboflow.com/waste-classification-uwqfy/1";
+  // Preflight
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
 
-if (!ROBOFLOW_API_KEY) {
-  console.error("❌ ROBOFLOW_API_KEY not found in .env");
-  process.exit(1);
-}
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method Not Allowed" });
+  }
 
-const app = express();
+  let { imageData } = req.body;
 
-// Allow your frontend origins
-app.use(cors({
-  origin: ["http://localhost:5173","https://eco-waste-ai-frontend.vercel.app"], // add more if needed
-  methods: ["GET","POST","OPTIONS"],
-  allowedHeaders: ["Content-Type"]
-}));
+  if (!imageData) {
+    return res.status(400).json({ error: "No image data provided" });
+  }
 
-// Accept JSON payloads up to 10MB
-app.use(express.json({ limit: "10mb" }));
+  // remove "data:image/jpeg;base64,"
+  if (imageData.includes("base64,")) {
+    imageData = imageData.split("base64,")[1];
+  }
 
-// Root route
-app.get("/", (req, res) => {
-  res.json({ status: "Server running" });
-});
-
-// Waste image classification route
-app.post("/api/classify", async (req, res) => {
   try {
-    const { imageData } = req.body;
-
-    if (!imageData) {
-      return res.status(400).json({ error: "No imageData provided" });
-    }
-
-    // Send request to Roboflow serverless model
     const response = await axios({
       method: "POST",
-      url: ROBOFLOW_MODEL_URL,
-      params: { api_key: ROBOFLOW_API_KEY },
+      url: "https://serverless.roboflow.com/waste-classification-uwqfy/1",
+      params: { api_key: process.env.ROBOFLOW_API_KEY },
       data: imageData,
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
       },
+      timeout: 20000,
     });
 
-    // Return Roboflow results to frontend
-    res.json({ results: response.data });
+    return res.status(200).json({ results: response.data });
 
   } catch (err) {
-    console.error("❌ Roboflow API error:", err.response?.data || err.message);
-    res.status(500).json({
+    return res.status(500).json({
       error: "Failed to classify image",
       details: err.response?.data || err.message,
     });
   }
-});
+}
 
-app.listen(PORT, () => {
-  console.log(`✅ Server running at http://localhost:${PORT}`);
-});
