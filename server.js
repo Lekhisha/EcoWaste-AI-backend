@@ -7,7 +7,7 @@ dotenv.config();
 
 const PORT = process.env.PORT || 8000;
 const ROBOFLOW_API_KEY = process.env.ROBOFLOW_API_KEY;
-const ROBOFLOW_MODEL_URL = "https://serverless.roboflow.com/waste-classification-uwqfy/1";
+const ROBOFLOW_MODEL_URL = "https://serverless.roboflow.com/waste-classification-msgta/1";
 
 if (!ROBOFLOW_API_KEY) {
   console.error("❌ ROBOFLOW_API_KEY not found in .env");
